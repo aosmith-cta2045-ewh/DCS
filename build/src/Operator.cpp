@@ -1,6 +1,7 @@
 // INCLUDES
 #include <iostream>
 #include <ctime>
+#include <string>
 #include "include/Operator.h"
 #include "include/tsu.h"
 
@@ -16,7 +17,7 @@ Operator::Operator (const std::string& filename,
     // loop through each row of the matrix and set each column to it's
     // header data type
     for (const auto &col : matrix) {
-        schedule_.emplace_back (stoi(col[0]), col[1], stoul(col[2]));
+        schedule_.emplace_back (col[0], col[1], stoul(col[2]));
     }
 }  // end constructor
 
@@ -28,15 +29,14 @@ Operator::~Operator () {
 // - gets the utc time and takes the modulus so the actual day of the scheduel
 // - is neglected.
 void Operator::Loop () {
-    // get the current time utc and take modulo to neglect days
-    unsigned int seconds_per_day = 60*60*24;
-    unsigned int utc = time(NULL) % seconds_per_day;
+    time_t now = time(nullptr);
+    std::string real_time = Operator::GetTime (now);
 
     // loop through each row of schedule looking for current time
     for (unsigned int i = index_; i < schedule_.size(); i++) {
         ScheduleHeader& row = schedule_[i];
-
-        if (row.time % seconds_per_day == utc && index_ != i) {
+        if (row.time == real_time && index_ != i) {
+std::cout << "[OPERATOR] : " << "time = " << real_time << ", schedule = " << row.time << std::endl;
 
             // if the time is found check control type
             if (row.control == "import") {
@@ -58,3 +58,12 @@ void Operator::Loop () {
         }
     }
 }  // end Loop
+
+// Get Time
+// - return HH:MM:SS formatted time
+std::string Operator::GetTime (time_t utc) {
+	struct tm ts = *localtime(&utc);
+	char buf[100];
+	strftime (buf, sizeof(buf), "%T", &ts);
+	return std::string(buf);
+}  // end Get Time

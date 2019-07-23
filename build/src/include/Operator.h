@@ -22,14 +22,16 @@ private:
     // since the file columns are known we can create and object to represent
     // the values within the column.
     struct ScheduleHeader {
-        unsigned int time;
+        std::string time;
         std::string control;
         unsigned int setting;
 
-        ScheduleHeader (int time, std::string control, unsigned int setting)
+        ScheduleHeader (std::string time, std::string control, unsigned int setting)
             : time(time), control(control), setting(setting) {
         };
     };
+
+    std::string GetTime (time_t now);
 
 private:
     unsigned int index_;
